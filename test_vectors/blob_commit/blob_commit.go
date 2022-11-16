@@ -1,0 +1,59 @@
+package blob_commit
+
+import (
+	context "github.com/crate-crypto/go-proto-danksharding-crypto"
+	"github.com/crate-crypto/go-proto-danksharding-crypto/agg_kzg"
+
+	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
+	helpers "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors"
+)
+
+type BlobCommitJson struct {
+	NumBlobs   int
+	BlobDegree int
+	// Each blob is a flat stream of bytes
+	Blobs       []string
+	Commitments []string
+}
+
+func Generate(c *context.Context, polyDegree int) BlobCommitJson {
+
+	numRandPolys := 10
+	polys := helpers.GeneratePolys(numRandPolys, polyDegree)
+
+	polys = addEdgeCases(polys, polyDegree)
+
+	// Commit to all of the polynomials
+	ck := c.CommitKey()
+	commitments, err := agg_kzg.CommitToPolynomials(polys, &ck)
+	if err != nil {
+		panic(err)
+	}
+
+	// Flatten and serialise all of the polynomials
+	serPolys := make([][]byte, len(polys))
+	for i, poly := range polys {
+		serPolys[i] = helpers.SerialisePoly(poly)
+	}
+
+	// Serialise ech commitment
+	serComms := make([][]byte, len(polys))
+	for i, comm := range commitments {
+		byts := comm.Bytes()
+		serComms[i] = byts[:]
+	}
+
+	return BlobCommitJson{
+		NumBlobs:    len(serPolys),
+		BlobDegree:  polyDegree,
+		Blobs:       helpers.ByteSlicesToHex(serPolys),
+		Commitments: helpers.ByteSlicesToHex(serComms),
+	}
+}
+
+func addEdgeCases(polys [][]fr.Element, polyDegree int) [][]fr.Element {
+	// 1. Add zero polynomial to the test case
+	zeroPoly := make([]fr.Element, polyDegree)
+	polys = append(polys, zeroPoly)
+	return polys
+}
