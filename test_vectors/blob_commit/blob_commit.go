@@ -25,6 +25,7 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 
 	// Commit to all of the polynomials
 	ck := c.CommitKey()
+	ck.ReversePoints() // TODO: We could put this in the context
 	commitments, err := agg_kzg.CommitToPolynomials(polys, &ck)
 	if err != nil {
 		panic(err)
