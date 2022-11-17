@@ -28,31 +28,45 @@ func FlattenBytes(matrix [][]byte) []byte {
 func SerialisePolys(polys [][]fr.Element) [][]byte {
 	var serialisedPolys [][]byte
 	for _, poly := range polys {
-		serialisedPolys = append(serialisedPolys, SerialisePoly(poly))
+		serialisedPolys = append(serialisedPolys, SerialiseFlattenPoly(poly))
 	}
 	return serialisedPolys
 }
 func SerialiseG1Points(points []curve.G1Affine) [][]byte {
 	var serialisedPoints [][]byte
 	for _, point := range points {
-		serPoint := point.Bytes()
-		serialisedPoints = append(serialisedPoints, serPoint[:])
+		serialisedPoints = append(serialisedPoints, SerialiseG1Point(point))
 	}
 	return serialisedPoints
+}
+func SerialiseG1Point(point curve.G1Affine) []byte {
+	serPoint := point.Bytes()
+	return serPoint[:]
 }
 func SerialiseG2Points(points []curve.G2Affine) [][]byte {
 	var serialisedPoints [][]byte
 	for _, point := range points {
-		serPoint := point.Bytes()
-		serialisedPoints = append(serialisedPoints, serPoint[:])
+		serialisedPoints = append(serialisedPoints, SerialiseG2Point(point))
 	}
 	return serialisedPoints
 }
-func SerialisePoly(poly []fr.Element) []byte {
+func SerialiseG2Point(point curve.G2Affine) []byte {
+	serPoint := point.Bytes()
+	return serPoint[:]
+}
+func SerialiseFlattenPoly(poly []fr.Element) []byte {
 	var serialisedPoly []byte
 	for _, eval := range poly {
 		bytes := eval.Bytes()
 		serialisedPoly = append(serialisedPoly, bytes[:]...)
+	}
+	return serialisedPoly
+}
+func SerialisePoly(poly []fr.Element) [][]byte {
+	var serialisedPoly [][]byte
+	for _, eval := range poly {
+		bytes := eval.Bytes()
+		serialisedPoly = append(serialisedPoly, bytes[:])
 	}
 	return serialisedPoly
 }
