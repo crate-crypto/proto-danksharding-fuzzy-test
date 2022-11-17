@@ -76,6 +76,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/crate-crypto/go-ipa v0.0.0-20220523130400-f11357ae11c7/go.mod h1:gFnFS95y8HstDP6P9pPwzrxOOC5TRDkwbM+ao15ChAI=
 github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221116175733-e7bd305ca204 h1:fqs16WUzR82Bo4pHMIrtiJGlNH01soRIck32GWqe4ag=
 github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221116175733-e7bd305ca204/go.mod h1:sb1Gv+xiW7NDtc05j60PJdm0HQFi47mAKEdlOhJ6K7k=
+github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221117160200-27e5f33f2392 h1:enuXaJK/cKJmouIU9kYta1KpMEUJEmU2Z4yjAEmwfes=
+github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221117160200-27e5f33f2392/go.mod h1:sb1Gv+xiW7NDtc05j60PJdm0HQFi47mAKEdlOhJ6K7k=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cyberdelia/templates v0.0.0-20141128023046-ca7fffd4298c/go.mod h1:GyV+0YP4qX0UQ7r2MoYZ+AvYDp12OF5yg4q8rGnyNh4=
 github.com/dave/jennifer v1.2.0/go.mod h1:fIb+770HOpJ2fmN9EPPKOqm1vMGhB+TwXKMZhrIygKg=
@@ -262,8 +264,8 @@ github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mattn/go-tty v0.0.0-20180907095812-13ff1204f104/go.mod h1:XPvLUNfbS4fJH25nqRHfWLMa1ONC8Amw+mIA639KxkE=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
-github.com/mdehoog/go-ethereum v1.10.19-0.20221115170900-127584459da6 h1:v8tUpebwNJJIwjx4UAnv6GQEKmDl9pRWtSPFXdL8veE=
-github.com/mdehoog/go-ethereum v1.10.19-0.20221115170900-127584459da6/go.mod h1:g+vX1+faxlr/KM1C0wybtfdcH5aPghqJAfpLGAn+Kbk=
+github.com/mdehoog/go-ethereum v1.10.19-0.20221117142754-381b51eccf71 h1:9aI5KT5lZJUsYCpvBbDOxrfzPn5zGj3g9xct1Ax1bLQ=
+github.com/mdehoog/go-ethereum v1.10.19-0.20221117142754-381b51eccf71/go.mod h1:g+vX1+faxlr/KM1C0wybtfdcH5aPghqJAfpLGAn+Kbk=
 github.com/mitchellh/mapstructure v1.4.1/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/pointerstructure v1.2.0/go.mod h1:BRAsLI5zgXmw97Lf6s25bs8ohIXc3tViBH44KcwB2g4=
 github.com/mmcloughlin/addchain v0.4.0 h1:SobOdjm2xLj1KkXN5/n0xTIWyZA2+s99UCY1iPfkHRY=
