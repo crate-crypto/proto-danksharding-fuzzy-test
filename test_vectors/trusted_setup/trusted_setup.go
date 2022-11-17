@@ -14,6 +14,8 @@ type TrustedSetupJson struct {
 	Secret     int
 	NumG1      int
 	NumG2      int
+	G1Gen      string
+	G2Gen      string
 	G1Elements []string
 	G2Elements []string
 }
@@ -32,10 +34,15 @@ func Generate(c *context.Context, secret int, polyDegree int) TrustedSetupJson {
 	g2Points := []curve.G2Affine{degree0G2, degree1G2}
 	serG2Points := helpers.SerialiseG2Points(g2Points)
 
+	var serGenG1 = helpers.SerialiseG1Point(c.OpenKeyKey().GenG1)
+	var serGenG2 = helpers.SerialiseG2Point(c.OpenKeyKey().GenG2)
+
 	return TrustedSetupJson{
 		Secret:     secret,
 		NumG1:      polyDegree,
 		NumG2:      numG2,
+		G1Gen:      helpers.BytesToHex(serGenG1),
+		G2Gen:      helpers.BytesToHex(serGenG2),
 		G1Elements: helpers.ByteSlicesToHex(serG1Points),
 		G2Elements: helpers.ByteSlicesToHex(serG2Points),
 	}
