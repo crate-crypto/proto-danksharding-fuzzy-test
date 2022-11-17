@@ -9,6 +9,7 @@ import (
 	context "github.com/crate-crypto/go-proto-danksharding-crypto"
 	proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/agg_proof"
 	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/blob_commit"
+	roots_of_unity "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/roots_of_unity"
 	transcript "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/transcript"
 	trusted_setup "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/trusted_setup"
 )
@@ -19,7 +20,7 @@ const POLY_DEGREE = 4096
 const SECRET = 1337
 
 // Name of the directory that the json files will be added to
-const DIR_NAME = "generated_vectors"
+const DIR_NAME = "generated"
 
 func main() {
 
@@ -30,7 +31,8 @@ func main() {
 	saveAsJson(proof.Generate(c, POLY_DEGREE), location("/agg_proof.json"))
 	saveAsJson(transcript.Generate(POLY_DEGREE), location("transcript.json"))
 	saveAsJson(blob_commit.Generate(c, POLY_DEGREE), location("blob_commit.json"))
-	saveAsJson(trusted_setup.Generate(c, SECRET, POLY_DEGREE), location("trusted_setup.json"))
+	saveAsJson(trusted_setup.Generate(c, SECRET, POLY_DEGREE), location("trusted_setup_lagrange.json"))
+	saveAsJson(roots_of_unity.Generate(c), location("roots_of_unity.json"))
 }
 
 func saveAsJson(data interface{}, fileName string) {
