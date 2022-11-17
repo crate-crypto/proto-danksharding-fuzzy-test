@@ -1,4 +1,4 @@
-package gokzg
+package gokzg_fuzz
 
 import (
 	"github.com/ethereum/go-ethereum/core/types"
