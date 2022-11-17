@@ -8,6 +8,8 @@ require (
 	github.com/consensys/gnark-crypto v0.8.0
 	github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221116175733-e7bd305ca204
 	github.com/ethereum/go-ethereum v0.0.0-00010101000000-000000000000
+	github.com/protolambda/go-kzg v0.0.0-20221108193918-c6d0faa55038
+
 )
 
 require (
