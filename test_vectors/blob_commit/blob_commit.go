@@ -33,7 +33,7 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 	// Flatten and serialise all of the polynomials
 	serPolys := make([][]byte, len(polys))
 	for i, poly := range polys {
-		serPolys[i] = helpers.SerialisePoly(poly)
+		serPolys[i] = helpers.SerialiseFlattenPoly(poly)
 	}
 
 	// Serialise ech commitment
