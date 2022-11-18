@@ -57,8 +57,9 @@ func SerialiseG2Point(point curve.G2Affine) []byte {
 func SerialiseFlattenPoly(poly []fr.Element) []byte {
 	var serialisedPoly []byte
 	for _, eval := range poly {
-		bytes := eval.Bytes()
-		serialisedPoly = append(serialisedPoly, bytes[:]...)
+		arr := eval.Bytes()
+		bytes := ReverseBytes(arr[:])
+		serialisedPoly = append(serialisedPoly, bytes...)
 	}
 	return serialisedPoly
 }
@@ -102,4 +103,11 @@ func ByteSlicesToHex(slice [][]byte) []string {
 		res[i] = BytesToHex(byts)
 	}
 	return res
+}
+
+func ReverseBytes(s []byte) []byte {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }

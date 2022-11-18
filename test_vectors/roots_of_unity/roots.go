@@ -14,7 +14,6 @@ func Generate(c *context.Context) RootsOfUnityJson {
 
 	domain := c.Domain()
 
-	domain.ReverseRoots()
 	roots := domain.Roots
 	numRoots := len(roots)
 	serRoots := helpers.SerialisePoly(roots)
