@@ -25,7 +25,6 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 
 	// Commit to all of the polynomials
 	ck := c.CommitKey()
-	ck.ReversePoints() // TODO: We could put this in the context
 	commitments, err := agg_kzg.CommitToPolynomials(polys, &ck)
 	if err != nil {
 		panic(err)
@@ -40,8 +39,7 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 	// Serialise ech commitment
 	serComms := make([][]byte, len(polys))
 	for i, comm := range commitments {
-		byts := comm.Bytes()
-		serComms[i] = byts[:]
+		serComms[i] = helpers.SerialiseG1Point(comm)
 	}
 
 	return BlobCommitJson{
@@ -56,5 +54,13 @@ func addEdgeCases(polys [][]fr.Element, polyDegree int) [][]fr.Element {
 	// 1. Add zero polynomial to the test case
 	zeroPoly := make([]fr.Element, polyDegree)
 	polys = append(polys, zeroPoly)
+
+	// 2. Add unit polynomial
+	for i := 0; i < polyDegree/32; i++ {
+		unitPoly := make([]fr.Element, polyDegree)
+		unitPoly[i].SetInt64(-1)
+		polys = append(polys, unitPoly)
+	}
+
 	return polys
 }
