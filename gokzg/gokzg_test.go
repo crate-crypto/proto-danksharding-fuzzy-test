@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"testing"
 
+	agg_proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/agg_proof"
 	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/blob_commit"
 	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/roots_of_unity"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -50,7 +52,7 @@ func TestBlobCommit(t *testing.T) {
 		blob := chunkBlob(data.Blobs[i])
 		expected_comm, _ := hex.DecodeString(data.Commitments[i])
 
-		got_comm, ok := kzg.BlobToKZGCommitment(types.Blob(blob))
+		got_comm, ok := kzg.BlobToKZGCommitment(blob)
 		if !ok {
 			panic("could not compute commitment to the blob")
 		}
@@ -58,14 +60,40 @@ func TestBlobCommit(t *testing.T) {
 		if !bytes.Equal(expected_comm, got_comm[:]) {
 			panic("expected commitment does not match computed commitment")
 		}
+	}
+}
 
+func TestAggProof(t *testing.T) {
+	var blobs types.Blobs
+
+	// Unmarshall json test vector
+	file, _ := ioutil.ReadFile("../generated/agg_proof.json")
+	data := agg_proof.AggProofJson{}
+	_ = json.Unmarshal([]byte(file), &data)
+
+	for i := 0; i < data.NumPolys; i++ {
+		blob := chunkBlob(data.Polynomials[i])
+		blobs = append(blobs, blob)
 	}
 
+	fmt.Println("comm0: ", data.Commitments[0])
+
+	proof, err := kzg.ComputeAggregateKZGProof(blobs)
+
+	if err != nil {
+		panic(err)
+	}
+
+	expected_proof, _ := hex.DecodeString(data.Proof)
+
+	if !bytes.Equal(proof[:], expected_proof) {
+		panic("proofs do not match")
+	}
 }
 
 // Bytes are reversed because test vectors are in big endian
 func FrfromBytesReversed(b []byte) protobls.Fr {
-	s0 := (*[32]byte)(ReverseBytes(b))
+	s0 := (*[32]byte)(b)
 	var fr protobls.Fr
 	ok := protobls.FrFrom32(&fr, *s0)
 	if !ok {
@@ -75,9 +103,8 @@ func FrfromBytesReversed(b []byte) protobls.Fr {
 }
 
 const chunkSize = 32
-const blobSize = 4096
 
-func chunkBlob(blobStr string) [blobSize]types.BLSFieldElement {
+func chunkBlob(blobStr string) types.Blob {
 
 	blobBytes, _ := hex.DecodeString(blobStr)
 	if len(blobBytes)%chunkSize != 0 {
@@ -85,20 +112,18 @@ func chunkBlob(blobStr string) [blobSize]types.BLSFieldElement {
 		panic("length of blob should be a multiple of 32")
 	}
 
-	var chunks [blobSize]types.BLSFieldElement
+	var chunks types.Blob
 	index := 0
 	for {
 		if len(blobBytes) == 0 {
 			break
 		}
 
-		// necessary check to avoid slicing beyond
-		// slice capacity
 		if len(blobBytes) < chunkSize {
 			panic("this only happens if the blobBytes cannot be chopped into equal chunkSize parts")
 		}
 
-		chunk := ReverseBytes(blobBytes[0:chunkSize])
+		chunk := blobBytes[0:chunkSize]
 		chunkArr := (*[chunkSize]byte)(chunk)
 		chunks[index] = types.BLSFieldElement(*chunkArr)
 		blobBytes = blobBytes[chunkSize:]
@@ -106,11 +131,4 @@ func chunkBlob(blobStr string) [blobSize]types.BLSFieldElement {
 	}
 
 	return chunks
-}
-
-func ReverseBytes(s []byte) []byte {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-	return s
 }
