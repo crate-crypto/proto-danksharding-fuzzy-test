@@ -2,11 +2,10 @@ module github.com/crate-crypto/proto-danksharding-fuzz
 
 go 1.17
 
-replace github.com/ethereum/go-ethereum => github.com/mdehoog/go-ethereum v1.10.19-0.20221117142754-381b51eccf71
-
+replace github.com/ethereum/go-ethereum => github.com/mdehoog/go-ethereum v1.10.19-0.20221118003432-c4dbf02418be
 require (
 	github.com/consensys/gnark-crypto v0.8.0
-	github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221117160200-27e5f33f2392
+	github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221119011121-8c17355a5be5
 	github.com/ethereum/go-ethereum v0.0.0-00010101000000-000000000000
 	github.com/protolambda/go-kzg v0.0.0-20221108193918-c6d0faa55038
 
