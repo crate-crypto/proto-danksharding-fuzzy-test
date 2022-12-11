@@ -28,12 +28,12 @@ func main() {
 
 	createTestVectorDir()
 
-	saveAsJson(agg_proof.Generate(c, POLY_DEGREE), location("/agg_proof.json"))
+	saveAsJson(agg_proof.Generate(c, POLY_DEGREE), location("/public_agg_proof.json"))
 	saveAsJson(transcript.Generate(POLY_DEGREE), location("transcript.json"))
-	saveAsJson(blob_commit.Generate(c, POLY_DEGREE), location("blob_commit.json"))
+	saveAsJson(blob_commit.Generate(c, POLY_DEGREE), location("public_blob_commit.json"))
 	saveAsJson(trusted_setup.Generate(c, SECRET, POLY_DEGREE), location("trusted_setup_lagrange.json"))
 	saveAsJson(roots_of_unity.Generate(c), location("roots_of_unity.json"))
-	saveAsJson(verify_kzg_proof.Generate(c, POLY_DEGREE), location("verify_kzg_proof.json"))
+	saveAsJson(verify_kzg_proof.Generate(c, POLY_DEGREE), location("public_verify_kzg_proof.json"))
 }
 
 func saveAsJson(data interface{}, fileName string) {

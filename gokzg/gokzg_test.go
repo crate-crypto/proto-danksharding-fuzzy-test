@@ -70,7 +70,7 @@ func (blobs Blobs) At(i int) eth.Blob {
 
 func TestBlobCommit(t *testing.T) {
 	// Unmarshall json test vector
-	file, _ := os.ReadFile("../generated/blob_commit.json")
+	file, _ := os.ReadFile("../generated/public_blob_commit.json")
 	data := blob_commit.BlobCommitJson{}
 	_ = json.Unmarshal([]byte(file), &data)
 
@@ -97,7 +97,7 @@ func TestAggProof(t *testing.T) {
 	var blobs Blobs
 
 	// Unmarshall json test vector
-	file, _ := os.ReadFile("../generated/agg_proof.json")
+	file, _ := os.ReadFile("../generated/public_agg_proof.json")
 	data := agg_proof.AggProofJson{}
 	_ = json.Unmarshal([]byte(file), &data)
 
@@ -125,7 +125,7 @@ func TestAggProof(t *testing.T) {
 func TestVerifyKZGProof(t *testing.T) {
 
 	// Unmarshall json test vector
-	file, _ := os.ReadFile("../generated/verify_kzg_proof.json")
+	file, _ := os.ReadFile("../generated/public_verify_kzg_proof.json")
 	data := verify_kzg_proof.VerifyKZGProofJson{}
 	_ = json.Unmarshal([]byte(file), &data)
 
