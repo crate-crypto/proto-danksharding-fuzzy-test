@@ -8,12 +8,17 @@ import (
 	helpers "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors"
 )
 
-type BlobCommitJson struct {
-	NumBlobs   int
-	BlobDegree int
+type TestCase struct {
 	// Each blob is a flat stream of bytes
+	BlobDegree  int
+	NumBlobs    int
 	Blobs       []string
 	Commitments []string
+}
+
+type BlobCommitJson struct {
+	NumTestCases uint32
+	TestCases    []TestCase
 }
 
 func Generate(c *context.Context, polyDegree int) BlobCommitJson {
@@ -42,11 +47,11 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 		serComms[i] = helpers.SerialiseG1Point(comm)
 	}
 
+	var testCases = []TestCase{TestCase{NumBlobs: len(serPolys), BlobDegree: polyDegree, Blobs: helpers.ByteSlicesToHex(serPolys), Commitments: helpers.ByteSlicesToHex(serComms)}}
+
 	return BlobCommitJson{
-		NumBlobs:    len(serPolys),
-		BlobDegree:  polyDegree,
-		Blobs:       helpers.ByteSlicesToHex(serPolys),
-		Commitments: helpers.ByteSlicesToHex(serComms),
+		NumTestCases: uint32(len(testCases)),
+		TestCases:    testCases,
 	}
 }
 

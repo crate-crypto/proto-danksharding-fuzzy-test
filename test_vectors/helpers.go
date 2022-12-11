@@ -66,7 +66,8 @@ func SerialiseFlattenPoly(poly []fr.Element) []byte {
 func SerialisePoly(poly []fr.Element) [][]byte {
 	var serialisedPoly [][]byte
 	for _, eval := range poly {
-		bytes := eval.Bytes()
+		arr := eval.Bytes()
+		bytes := ReverseBytes(arr[:])
 		serialisedPoly = append(serialisedPoly, bytes[:])
 	}
 	return serialisedPoly
