@@ -3,15 +3,15 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 
 	context "github.com/crate-crypto/go-proto-danksharding-crypto"
-	proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/agg_proof"
-	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/blob_commit"
+	agg_proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/agg_proof"
+	blob_commit "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/blob_commit"
 	roots_of_unity "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/roots_of_unity"
 	transcript "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/transcript"
 	trusted_setup "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/trusted_setup"
+	verify_kzg_proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/verify_kzg_proof"
 )
 
 // run this file to generate the json test vector files
@@ -28,16 +28,17 @@ func main() {
 
 	createTestVectorDir()
 
-	saveAsJson(proof.Generate(c, POLY_DEGREE), location("/agg_proof.json"))
+	saveAsJson(agg_proof.Generate(c, POLY_DEGREE), location("/agg_proof.json"))
 	saveAsJson(transcript.Generate(POLY_DEGREE), location("transcript.json"))
 	saveAsJson(blob_commit.Generate(c, POLY_DEGREE), location("blob_commit.json"))
 	saveAsJson(trusted_setup.Generate(c, SECRET, POLY_DEGREE), location("trusted_setup_lagrange.json"))
 	saveAsJson(roots_of_unity.Generate(c), location("roots_of_unity.json"))
+	saveAsJson(verify_kzg_proof.Generate(c, POLY_DEGREE), location("verify_kzg_proof.json"))
 }
 
 func saveAsJson(data interface{}, fileName string) {
 	file, _ := json.MarshalIndent(data, "", " ")
-	_ = ioutil.WriteFile(fileName, file, 0644)
+	_ = os.WriteFile(fileName, file, 0644)
 }
 
 func location(fileName string) string {
