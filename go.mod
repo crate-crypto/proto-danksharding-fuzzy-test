@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/consensys/gnark-crypto v0.8.0
-	github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221211171546-06185ffb3d9c
+	github.com/crate-crypto/go-proto-danksharding-crypto v0.0.0-20221211211706-3dd424f9b360
 	github.com/protolambda/go-kzg v0.0.0-20221129234330-612948a21fb0
 )
 
