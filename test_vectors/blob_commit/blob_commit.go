@@ -10,13 +10,12 @@ import (
 
 type TestCase struct {
 	// Each blob is a flat stream of bytes
-	BlobDegree  int
-	NumBlobs    int
-	Blobs       []string
-	Commitments []string
+	Blob       string
+	Commitment string
 }
 
 type BlobCommitJson struct {
+	BlobDegree   int
 	NumTestCases uint32
 	TestCases    []TestCase
 }
@@ -47,9 +46,17 @@ func Generate(c *context.Context, polyDegree int) BlobCommitJson {
 		serComms[i] = helpers.SerialiseG1Point(comm)
 	}
 
-	var testCases = []TestCase{TestCase{NumBlobs: len(serPolys), BlobDegree: polyDegree, Blobs: helpers.ByteSlicesToHex(serPolys), Commitments: helpers.ByteSlicesToHex(serComms)}}
+	testCases := make([]TestCase, len(polys))
+	for i := 0; i < len(polys); i++ {
+		tc := TestCase{
+			Blob:       helpers.BytesToHex(serPolys[i]),
+			Commitment: helpers.BytesToHex(serComms[i]),
+		}
+		testCases[i] = tc
+	}
 
 	return BlobCommitJson{
+		BlobDegree:   polyDegree,
 		NumTestCases: uint32(len(testCases)),
 		TestCases:    testCases,
 	}
