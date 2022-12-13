@@ -19,54 +19,62 @@ async function main() {
 async function testBlobCommit() {
 
     // Convert blobs as hex string to uint8arrays
-    let blobs = new Array(blobCommitJson.NumBlobs)
-    for (let i = 0; i < blobCommitJson.NumBlobs; i++) {
-        let blobHexStr = blobCommitJson.Blobs[i]
+    let numBlobs = blobCommitJson.NumTestCases;
+
+    for (let i = 0; i < numBlobs; i++) {
+        let testCase = blobCommitJson.TestCases[i];
+
+        let blobHexStr = testCase.Blob;
+        let commHexStr = testCase.Commitment;
 
         let blobBytes = Uint8Array.from(Buffer.from(blobHexStr, 'hex'));
+        let expectedCommBytes = Uint8Array.from(Buffer.from(commHexStr, 'hex'));
 
-        blobs[i] = blobBytes;
-    }
+        // Compute the commitment
+        let gotCommBytes = blobToKzgCommitment(blobBytes)
 
-    // Compute the commitment for each blob
-    let commitments = blobs.map(blobToKzgCommitment);
-
-    for (let i = 0; i < blobCommitJson.NumBlobs; i++) {
-        let gotComm = commitments[i];
-
-        let expectedCommStr = blobCommitJson.Commitments[i];
-        let expectedComm = Uint8Array.from(Buffer.from(expectedCommStr, 'hex'));
-
-        if (expectedComm.toString() != gotComm.toString()) {
+        if (expectedCommBytes.toString() != gotCommBytes.toString()) {
             throw new Error("commitments do not match ")
         }
+
     }
+
 
     console.log("Blob commit test passed")
 }
 
 async function testAggProof() {
 
-    // Convert blobs as hex string to uint8arrays
-    let blobs = new Array(aggProofJson.NumPolys)
-    for (let i = 0; i < aggProofJson.NumPolys; i++) {
-        let blobHexStr = aggProofJson.Polynomials[i]
 
-        let blobBytes = Uint8Array.from(Buffer.from(blobHexStr, 'hex'));
+    let numTestCases = aggProofJson.TestCases.length
 
-        blobs[i] = blobBytes;
+
+    // For each test case
+    for (let i = 0; i < numTestCases; i++) {
+
+        let testCase = aggProofJson.TestCases[i]
+
+        // 1. Convert blobs as hex string to uint8arrays
+        let blobs = new Array(testCase.NumPolys)
+
+        for (let j = 0; j < testCase.NumPolys; j++) {
+            let blobHexStr = testCase.Polynomials[j]
+            let blobBytes = Uint8Array.from(Buffer.from(blobHexStr, 'hex'));
+            blobs[j] = blobBytes;
+        }
+
+        // 2. Compute the kzg proof based off of the blobs
+        let gotProofBytes = computeAggregateKzgProof(blobs)
+
+        let expectedProofStr = testCase.Proof;
+        let expectedProofBytes = Uint8Array.from(Buffer.from(expectedProofStr, 'hex'));
+
+        if (expectedProofBytes.toString() != gotProofBytes.toString()) {
+            throw new Error("kzg proofs do not match ")
+        }
+
+        console.log("Agg Proof test passed")
     }
-
-    let gotProof = computeAggregateKzgProof(blobs)
-
-    let expectedProofStr = aggProofJson.Proof;
-    let expectedProof = Uint8Array.from(Buffer.from(expectedProofStr, 'hex'));
-
-    if (expectedProof.toString() != gotProof.toString()) {
-        throw new Error("kzg proofs do not match ")
-    }
-
-    console.log("Agg Proof test passed")
 }
 
 main().catch(console.error)
