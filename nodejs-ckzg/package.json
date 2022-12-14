@@ -10,7 +10,7 @@
     "dev-start": "ts-node src/index.ts"
   },
   "dependencies": {
-    "c-kzg": "1.0.8",
+    "c-kzg": "1.0.9",
     "tslib": "^2.4.1"
   },
   "devDependencies": {

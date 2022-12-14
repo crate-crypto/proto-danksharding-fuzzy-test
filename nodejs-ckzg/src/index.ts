@@ -1,7 +1,8 @@
-import { loadTrustedSetup, computeAggregateKzgProof, blobToKzgCommitment, transformTrustedSetupJSON, freeTrustedSetup } from "c-kzg";
+import { loadTrustedSetup, computeAggregateKzgProof, blobToKzgCommitment, transformTrustedSetupJSON, freeTrustedSetup, verifyKzgProof } from "c-kzg";
 
 import * as blobCommitJson from './blob_commit.json';
 import * as aggProofJson from './agg_proof.json';
+import * as verifyKZGJson from './public_verify_kzg_proof.json';
 
 
 const SETUP_FILE_PATH = "./src/testing_trusted_setup.json"
@@ -75,6 +76,28 @@ async function testAggProof() {
 
         console.log("Agg Proof test passed")
     }
+}
+
+
+async function testVerifyKzg() {
+    let numTestCases = verifyKZGJson.NumTestCases
+    for (let i = 0; i < numTestCases; i++) {
+        let testCase = verifyKZGJson.TestCases[i]
+
+        let polyBytes = Uint8Array.from(Buffer.from(testCase.Polynomial, 'hex'));
+        let proofBytes = Uint8Array.from(Buffer.from(testCase.Proof, 'hex'));
+        let commBytes = Uint8Array.from(Buffer.from(testCase.Commitment, 'hex'));
+        let inputPointBytes = Uint8Array.from(Buffer.from(testCase.InputPoint, 'hex'));
+        let claimedValueBytes = Uint8Array.from(Buffer.from(testCase.ClaimedValue, 'hex'));
+
+        let ok = verifyKzgProof(commBytes, inputPointBytes, claimedValueBytes, proofBytes)
+        if (ok == false) {
+            throw new Error("verify kzg proof function should return true")
+        }
+    }
+
+    console.log("verify kzg proof passed.")
+
 }
 
 main().catch(console.error)
