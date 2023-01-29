@@ -2,6 +2,7 @@ package roots_of_unity
 
 import (
 	context "github.com/crate-crypto/go-proto-danksharding-crypto"
+	"github.com/crate-crypto/go-proto-danksharding-crypto/serialisation"
 	helpers "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors"
 )
 
@@ -16,7 +17,13 @@ func Generate(c *context.Context) RootsOfUnityJson {
 
 	roots := domain.Roots
 	numRoots := len(roots)
-	serRoots := helpers.SerialisePoly(roots)
+
+	serRoots := make([][]byte, numRoots)
+	for i := 0; i < numRoots; i++ {
+		serialisedScalar := serialisation.SerialiseScalar(roots[i])
+		serRoots[i] = serialisedScalar[:]
+	}
+
 	return RootsOfUnityJson{
 		NumRoots:      numRoots,
 		PermutedRoots: helpers.ByteSlicesToHex(serRoots),

@@ -2,6 +2,7 @@ package trusted_setup
 
 import (
 	context "github.com/crate-crypto/go-proto-danksharding-crypto"
+	"github.com/crate-crypto/go-proto-danksharding-crypto/serialisation"
 	helpers "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors"
 
 	curve "github.com/consensys/gnark-crypto/ecc/bls12-381"
@@ -20,32 +21,32 @@ type TrustedSetupJson struct {
 	G2Elements         []string
 }
 
-func Generate(c *context.Context, secret int, polyDegree int) TrustedSetupJson {
+func Generate(c *context.Context) TrustedSetupJson {
 
 	// For KZG/Proto danksharding, this is always 2
 	numG2 := 2
 
-	ck := c.CommitKey()
-	g1Points := ck.G1
-
-	serG1Points := helpers.SerialiseG1Points(g1Points)
+	g1Points := c.CommitKey().G1
+	serG1Points := serialisation.SerialiseG1Points(g1Points)
 
 	degree0G2 := c.OpenKeyKey().GenG2
 	degree1G2 := c.OpenKeyKey().AlphaG2
 
 	g2Points := []curve.G2Affine{degree0G2, degree1G2}
-	serG2Points := helpers.SerialiseG2Points(g2Points)
+	serG2PointDeg0 := serialisation.SerialiseG2Point(g2Points[0])
+	serG2PointDeg1 := serialisation.SerialiseG2Point(g2Points[1])
+	serG2Points := [][]byte{serG2PointDeg0[:], serG2PointDeg1[:]}
 
-	var serGenG1 = helpers.SerialiseG1Point(c.OpenKeyKey().GenG1)
-	var serGenG2 = helpers.SerialiseG2Point(c.OpenKeyKey().GenG2)
+	var serGenG1 = serialisation.SerialiseG1Point(c.OpenKeyKey().GenG1)
+	var serGenG2 = serialisation.SerialiseG2Point(c.OpenKeyKey().GenG2)
 
 	return TrustedSetupJson{
-		Secret:             secret,
-		NumG1:              polyDegree,
+		Secret:             helpers.SECRET,
+		NumG1:              helpers.NUM_EVALUATIONS_IN_POLYNOMIALS,
 		NumG2:              numG2,
-		G1Gen:              helpers.BytesToHex(serGenG1),
-		G2Gen:              helpers.BytesToHex(serGenG2),
-		PermutedG1Elements: helpers.ByteSlicesToHex(serG1Points),
+		G1Gen:              helpers.BytesToHex(serGenG1[:]),
+		G2Gen:              helpers.BytesToHex(serGenG2[:]),
+		PermutedG1Elements: helpers.CommitmentsToHex(serG1Points),
 		G2Elements:         helpers.ByteSlicesToHex(serG2Points),
 	}
 
