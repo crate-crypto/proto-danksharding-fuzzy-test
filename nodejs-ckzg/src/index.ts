@@ -101,16 +101,3 @@ async function testVerifyKzg() {
 }
 
 main().catch(console.error)
-
-
-// f
-
-// const file = await transformTrustedSetupJSON(SETUP_FILE_PATH);
-// loadTrustedSetup(file);
-
-// freeTrustedSetup();
-
-// let blobs = new Array(2).fill(0).map(generateRandomBlob);
-// let commitments = blobs.map(blobToKzgCommitment);
-// let proof = computeAggregateKzgProof(blobs);
-// expect(verifyAggregateKzgProof(blobs, commitments, proof)).toBe(true);
