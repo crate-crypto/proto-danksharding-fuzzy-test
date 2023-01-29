@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	agg_proof "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/agg_proof"
-	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/blob_commit"
+	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/precompile"
 	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/roots_of_unity"
 	"github.com/crate-crypto/proto-danksharding-fuzz/test_vectors/verify_kzg_proof"
 
@@ -68,31 +68,35 @@ func (blobs Blobs) At(i int) eth.Blob {
 	return blobs[i]
 }
 
-func TestBlobCommit(t *testing.T) {
+func TestPrecompile(t *testing.T) {
 	// Unmarshall json test vector
-	file, _ := os.ReadFile("../generated/public_blob_commit.json")
-	data := blob_commit.BlobCommitJson{}
+	file, _ := os.ReadFile("../generated/precompile.json")
+	data := precompile.PrecompileJson{}
 	_ = json.Unmarshal([]byte(file), &data)
 
-	// Iterate each test case
+	expectedPrecompileReturnValueBytes, err := hex.DecodeString(data.PrecompileReturnValue)
+	if err != nil {
+		t.Error(err)
+	}
 	for _, testCase := range data.TestCases {
-		for i := 0; i < testCase.NumBlobs; i++ {
-			blob := chunkBlob(testCase.Blobs[i])
-			expected_comm, _ := hex.DecodeString(testCase.Commitments[i])
 
-			got_comm, ok := eth.BlobToKZGCommitment(blob)
-			if !ok {
-				panic("could not compute commitment to the blob")
-			}
+		inputBytes, err := hex.DecodeString(testCase.Input)
+		if err != nil {
+			t.Error(err)
+		}
+		returnValBytes, err := eth.PointEvaluationPrecompile(inputBytes)
 
-			if !bytes.Equal(expected_comm, got_comm[:]) {
-				panic("expected commitment does not match computed commitment")
-			}
+		if testCase.Valid && err != nil {
+			t.Errorf("expected a true value, however an error was returned from the precompile: %v", err)
+		}
+
+		// If there were no errors then the precompile should return the `PrecompileReturnValue`
+		// which is specified in EIP-4844
+		if !bytes.Equal(returnValBytes, expectedPrecompileReturnValueBytes) {
+			t.Errorf("precompile returned an expected return value, \nexpected: %v, \ngot %v", expectedPrecompileReturnValueBytes, returnValBytes)
 		}
 	}
-
 }
-
 func TestAggProof(t *testing.T) {
 	var blobs Blobs
 
