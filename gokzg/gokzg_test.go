@@ -70,7 +70,10 @@ func (blobs Blobs) At(i int) eth.Blob {
 
 func TestPrecompile(t *testing.T) {
 	// Unmarshall json test vector
-	file, _ := os.ReadFile("../generated/precompile.json")
+	file, err := os.ReadFile("../generated/public_precompile.json")
+	if err != nil {
+		panic("could not read file")
+	}
 	data := precompile.PrecompileJson{}
 	_ = json.Unmarshal([]byte(file), &data)
 
@@ -82,18 +85,32 @@ func TestPrecompile(t *testing.T) {
 
 		inputBytes, err := hex.DecodeString(testCase.Input)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 		returnValBytes, err := eth.PointEvaluationPrecompile(inputBytes)
 
-		if testCase.Valid && err != nil {
-			t.Errorf("expected a true value, however an error was returned from the precompile: %v", err)
+		if testCase.Valid {
+			// There should be no error
+			if err != nil {
+				t.Fatalf("expected a true value, however an error was returned from the precompile: %v", err)
+			}
+
+			// Now check that the return value is correct
+			//
+			// If there were no errors then the precompile should return the `PrecompileReturnValue`
+			// which is specified in EIP-4844
+			if !bytes.Equal(returnValBytes, expectedPrecompileReturnValueBytes) {
+				fmt.Println(testCase.Valid, err)
+				t.Fatalf("unexpected precompile return value, \nexpected: %v, \ngot %v", expectedPrecompileReturnValueBytes, returnValBytes)
+			}
 		}
 
-		// If there were no errors then the precompile should return the `PrecompileReturnValue`
-		// which is specified in EIP-4844
-		if !bytes.Equal(returnValBytes, expectedPrecompileReturnValueBytes) {
-			t.Errorf("precompile returned an expected return value, \nexpected: %v, \ngot %v", expectedPrecompileReturnValueBytes, returnValBytes)
+		if !testCase.Valid {
+			// Since we used invalid input data, we expect an error
+			if err == nil {
+				t.Fatalf("input data was invalid, however no error was returned.")
+			}
+
 		}
 	}
 }
