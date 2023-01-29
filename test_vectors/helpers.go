@@ -1,81 +1,66 @@
 package helpers
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 
 	curve "github.com/consensys/gnark-crypto/ecc/bls12-381"
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
+	"github.com/crate-crypto/go-proto-danksharding-crypto/serialisation"
 )
 
-func GeneratePolys(numPolys int, degree int) [][]fr.Element {
+// The degree of the polynomial is fixed at 4095
+// So each polynomial will have 4096 evaluations
+const NUM_EVALUATIONS_IN_POLYNOMIALS = 4096
+
+// The secret being used to generate the insecure trusted setup
+const SECRET = 1337
+
+// TODO: have this take a seed, so we can generate different polynomials
+func GeneratePolys4096(numPolys int) [][]fr.Element {
 	polys := make([][]fr.Element, numPolys)
 	offset := 0
 	for i := 0; i < numPolys; i++ {
-		polys[i] = OffsetPoly(offset, degree)
-		offset += degree
+		polys[i] = offsetPoly(offset)
+		offset += NUM_EVALUATIONS_IN_POLYNOMIALS
 	}
 	return polys
 }
 
-func FlattenBytes(matrix [][]byte) []byte {
-	var flattenedBytes []byte
-	for _, byteSlice := range matrix {
-		flattenedBytes = append(flattenedBytes, byteSlice...)
+func GenerateScalars(seed string, numScalars uint) []fr.Element {
+
+	seedByte := []byte(seed)
+
+	scalars := make([]fr.Element, numScalars)
+	for i := 0; i < int(numScalars); i++ {
+		scalar := hashIndexToField(seedByte, i)
+		scalars[i] = scalar
 	}
-	return flattenedBytes
+
+	return scalars
 }
 
-func SerialisePolys(polys [][]fr.Element) [][]byte {
-	var serialisedPolys [][]byte
-	for _, poly := range polys {
-		serialisedPolys = append(serialisedPolys, SerialiseFlattenPoly(poly))
-	}
-	return serialisedPolys
-}
-func SerialiseG1Points(points []curve.G1Affine) [][]byte {
-	var serialisedPoints [][]byte
-	for _, point := range points {
-		serialisedPoints = append(serialisedPoints, SerialiseG1Point(point))
-	}
-	return serialisedPoints
-}
-func SerialiseG1Point(point curve.G1Affine) []byte {
-	serPoint := point.Bytes()
-	return serPoint[:]
-}
-func SerialiseG2Points(points []curve.G2Affine) [][]byte {
-	var serialisedPoints [][]byte
-	for _, point := range points {
-		serialisedPoints = append(serialisedPoints, SerialiseG2Point(point))
-	}
-	return serialisedPoints
-}
-func SerialiseG2Point(point curve.G2Affine) []byte {
-	serPoint := point.Bytes()
-	return serPoint[:]
-}
-func SerialiseFlattenPoly(poly []fr.Element) []byte {
-	var serialisedPoly []byte
-	for _, eval := range poly {
-		arr := eval.Bytes()
-		bytes := ReverseBytes(arr[:])
-		serialisedPoly = append(serialisedPoly, bytes...)
-	}
-	return serialisedPoly
-}
-func SerialisePoly(poly []fr.Element) [][]byte {
-	var serialisedPoly [][]byte
-	for _, eval := range poly {
-		arr := eval.Bytes()
-		bytes := ReverseBytes(arr[:])
-		serialisedPoly = append(serialisedPoly, bytes[:])
-	}
-	return serialisedPoly
+func hashIndexToField(byts []byte, index int) fr.Element {
+
+	sha := sha256.New()
+
+	indexByte := make([]byte, 4)
+	binary.LittleEndian.PutUint32(indexByte, uint32(index))
+
+	shaInput := append(byts, indexByte...)
+	hashOutput := sha.Sum(shaInput)
+
+	var scalar fr.Element
+	scalar.SetBytes(hashOutput)
+
+	return scalar
 }
 
-func OffsetPoly(offset int, polyDegree int) []fr.Element {
-	poly := make([]fr.Element, polyDegree)
-	for i := 0; i < polyDegree; i++ {
+func offsetPoly(offset int) []fr.Element {
+	poly := make([]fr.Element, NUM_EVALUATIONS_IN_POLYNOMIALS)
+	for i := 0; i < NUM_EVALUATIONS_IN_POLYNOMIALS; i++ {
 		var eval fr.Element
 		eval.SetInt64(int64(offset + i))
 		poly[i] = eval
@@ -98,6 +83,13 @@ func GeneratePoints(size int) []curve.G1Affine {
 func BytesToHex(slice []byte) string {
 	return hex.EncodeToString(slice)
 }
+func HexToBytes(hexString string) []byte {
+	byts, err := hex.DecodeString(hexString)
+	if err != nil {
+		panic(err)
+	}
+	return byts
+}
 func ByteSlicesToHex(slice [][]byte) []string {
 	res := make([]string, len(slice))
 	for i, byts := range slice {
@@ -105,10 +97,27 @@ func ByteSlicesToHex(slice [][]byte) []string {
 	}
 	return res
 }
-
-func ReverseBytes(s []byte) []byte {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
+func BlobsToHex(blobs []serialisation.Blob) []string {
+	res := make([]string, len(blobs))
+	for i, blob := range blobs {
+		res[i] = BytesToHex(blob[:])
 	}
-	return s
+	return res
+}
+func CommitmentsToHex(comms []serialisation.Commitment) []string {
+	res := make([]string, len(comms))
+	for i, comm := range comms {
+		res[i] = BytesToHex(comm[:])
+	}
+	return res
+}
+func HexToCommitment(hexString string) serialisation.Commitment {
+
+	byts, err := hex.DecodeString(hexString)
+	if err != nil {
+		panic(fmt.Sprintf("hex string is not decodable: %v", err))
+	}
+	comm := (*[serialisation.COMPRESSED_G1_SIZE]byte)(byts)
+
+	return *comm
 }
