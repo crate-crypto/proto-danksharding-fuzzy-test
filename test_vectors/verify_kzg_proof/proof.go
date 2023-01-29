@@ -1,10 +1,8 @@
 package verify_kzg_proof
 
 import (
-	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
-
 	context "github.com/crate-crypto/go-proto-danksharding-crypto"
-	"github.com/crate-crypto/go-proto-danksharding-crypto/utils"
+	"github.com/crate-crypto/go-proto-danksharding-crypto/serialisation"
 	helpers "github.com/crate-crypto/proto-danksharding-fuzz/test_vectors"
 )
 
@@ -22,35 +20,34 @@ type VerifyKZGProofJson struct {
 	TestCases    []TestCase
 }
 
-func Generate(c *context.Context, polyDegree int) VerifyKZGProofJson {
-	numPolys := 2
+// This method takes a seed as it is also called
+// from the precompile test case and we want to generate different
+// inputs
+func Generate(c *context.Context, numPolys int, seed string) VerifyKZGProofJson {
 
-	polys := helpers.GeneratePolys(numPolys, polyDegree)
+	polys := helpers.GeneratePolys4096(numPolys)
 
 	testCases := make([]TestCase, numPolys)
 
+	scalars := helpers.GenerateScalars(seed, uint(numPolys))
+
 	for index, poly := range polys {
-		var inputPoint fr.Element
-		// Set the point such that it is not a value in the domain
-		// The opening algorithm and the specs do not explicitly handle this case
-		inputPoint.SetInt64(int64(index + 2*polyDegree))
 
-		inputPointBytes := inputPoint.Bytes()
-		utils.ReverseArray(&inputPointBytes) // Reverse so that it is in little endian format
+		inputPoint := scalars[index]
 
-		polyBytes := helpers.SerialisePoly(poly)
+		inputPointBytes := serialisation.SerialiseScalar(inputPoint)
+		polyBytes := serialisation.SerialisePoly(poly)
 
-		proof, polyComm, claimedValue, err := c.ComputeKzgProof(polyBytes, inputPointBytes)
+		proof, polyComm, claimedValue, err := c.ComputeKZGProof(polyBytes, inputPointBytes)
 		if err != nil {
 			panic(err)
 		}
-		polyBytesFlattened := helpers.FlattenBytes(polyBytes)
 
 		tc := TestCase{
-			PolyDegree:   polyDegree,
-			Polynomial:   helpers.BytesToHex(polyBytesFlattened),
-			Proof:        helpers.BytesToHex(proof),
-			Commitment:   helpers.BytesToHex(polyComm),
+			PolyDegree:   helpers.NUM_EVALUATIONS_IN_POLYNOMIALS,
+			Polynomial:   helpers.BytesToHex(polyBytes[:]),
+			Proof:        helpers.BytesToHex(proof[:]),
+			Commitment:   helpers.BytesToHex(polyComm[:]),
 			InputPoint:   helpers.BytesToHex(inputPointBytes[:]),
 			ClaimedValue: helpers.BytesToHex(claimedValue[:]),
 		}
@@ -61,30 +58,5 @@ func Generate(c *context.Context, polyDegree int) VerifyKZGProofJson {
 		NumTestCases: uint32(len(testCases)),
 		TestCases:    testCases,
 	}
-
-	// var eval fr.Element
-	// eval.SetInt64(int64(2561234561))
-	// inputPointBytes := eval.Bytes()
-	// utils.ReverseArray(&inputPointBytes)
-
-	// polyBytes := helpers.SerialisePoly(polys[0])
-	// proof, polyComm, claimedValue, err := c.ComputeKzgProof(polyBytes, inputPointBytes)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// polyBytesFlattened := helpers.FlattenBytes(polyBytes)
-
-	// return VerifyKZGProofJson{
-	// 	TestCases: []TestCase{
-	// 		TestCase{
-	// 			PolyDegree:   polyDegree,
-	// 			Polynomial:   helpers.BytesToHex(polyBytesFlattened),
-	// 			Proof:        helpers.BytesToHex(proof),
-	// 			Commitment:   helpers.BytesToHex(polyComm),
-	// 			InputPoint:   helpers.BytesToHex(inputPointBytes[:]),
-	// 			ClaimedValue: helpers.BytesToHex(claimedValue[:]),
-	// 		},
-	// 	},
-	// }
 
 }
